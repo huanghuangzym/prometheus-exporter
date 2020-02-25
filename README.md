@@ -65,28 +65,3 @@ Summary和Histogram类似，都可以统计事件发生的次数或者大小，�
 * `scrape_duration_seconds{job="<job>", instance="<instance>"}`：抓取耗时；
 * `scrape_samples_post_metric_relabeling{job="<job>", instance="<instance>"}`：指标重新标记后剩余的样本数。
 * `scrape_samples_scraped{job="<job>", instance="<instance>"}`：实例暴露的样本数
-
-该`up`指标对于监控实例健康状态很有用。
-
-## 二、最简单的Exporter
-
-当你安装好go的开发环境，并下载好[Prometheus依赖包](https://github.com/prometheus/client_golang/tree/master/prometheus)到vendor以后，就可以编译个最简单的Exporter，代码如下:
-```go
-package main
-
-import (
-    "log"
-    "net/http"
-    "github.com/prometheus/client_golang/prometheus/promhttp"
-)
-
-func main() {
-    http.Handle("/metrics", promhttp.Handler())
-    log.Fatal(http.ListenAndServe(":8080", nil))
-}
-```
-
-执行`go build`编译运行，然后访问`http://127.0.0.1:8080/metrics`就可以看到采集到的指标数据。
-
-这段代码仅仅通过http模块指定了一个路径`/metrics`，并将client_golang库中的`promhttp.Handler()`作为处理函数传递进去后，就可以获取指标数据了。这个最简单的 Exporter 内部其实是使用了一个默认的收集器`NewGoCollector`采集当前Go运行时的相关信息，比如go堆栈使用、goroutine数据等等。
-

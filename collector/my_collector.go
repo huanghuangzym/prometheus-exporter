@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"fmt"
 	"sync"
 	"github.com/prometheus/client_golang/prometheus"
 	"math/rand"
@@ -9,9 +10,16 @@ import (
 // 指标结构体
 type Metrics struct {
 	metricName string
+	metricAppName string
+	metricGuageName string
 	metrics map[string]*prometheus.Desc
 	mutex   sync.Mutex
 }
+
+const  AppLabelKey = "APP"
+const  AppVersionKey = "VERSION"
+const  MetricKey = "Metric"
+
 
 
 func newGlobalMetric(metricName string, docString string, labels []string) *prometheus.Desc {
@@ -20,12 +28,14 @@ func newGlobalMetric(metricName string, docString string, labels []string) *prom
 
 
 
-func NewMetrics(name string) *Metrics {
+func NewMetrics(name, appname, guagename string) *Metrics {
 	return &Metrics{
 		metrics: map[string]*prometheus.Desc{
-			name: newGlobalMetric( name,"The description of my_gauge_metric", []string{"host"}),
+			name: newGlobalMetric( name,fmt.Sprintf("The description of %s",name), []string{AppLabelKey,AppVersionKey,MetricKey}),
 		},
 		metricName: name,
+		metricAppName: appname,
+		metricGuageName: guagename,
 	}
 }
 
@@ -42,15 +52,15 @@ func (c *Metrics) Collect(ch chan<- prometheus.Metric) {
 
 	mockGaugeMetricData := c.GenerateMockData()
 	for host, currentValue := range mockGaugeMetricData {
-		ch <-prometheus.MustNewConstMetric(c.metrics[c.metricName], prometheus.GaugeValue, float64(currentValue), host)
+		ch <-prometheus.MustNewConstMetric(c.metrics[c.metricName], prometheus.GaugeValue, float64(currentValue), c.metricAppName,"v1",host)
 	}
 }
 
 
  func (c *Metrics) GenerateMockData() (mockGaugeMetricData map[string]int) {
 	mockGaugeMetricData = map[string]int{
-		"yahoo.com": int(rand.Int31n(10)),
-		"google.com": int(rand.Int31n(10)),
+		fmt.Sprintf("total_req_%s",c.metricGuageName): int(rand.Int31n(10)),
+		fmt.Sprintf("total_send_%s",c.metricGuageName): int(rand.Int31n(10)),
 	}
 	return
  }

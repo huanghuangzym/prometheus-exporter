@@ -11,20 +11,24 @@ import (
 )
 
 var (
-	listenAddr  = flag.String("web.listen-port", "9001", "An port to listen on for web interface and telemetry.")
-	metricsPath = flag.String("web.telemetry-path", "/metrics", "A path under which to expose metrics.")
-	metricsName = flag.String("metric.name", "product_demo", "Prometheus metrics name")
+	listenAddr  = flag.String("port", "9001", "An port to listen on for web interface and telemetry.")
+	metricsName = flag.String("name", "product_metric_demo", "Prometheus metrics name")
+	metricsAppName = flag.String("app", "asm", "Prometheus metrics name")
+	metricsGuageName = flag.String("label", "istio", "Prometheus metrics name")
+
 )
 
 
 func main() {
 	flag.Parse()
 
-	metrics := collector.NewMetrics(*metricsName)
+	metricPath := "/metrics"
+
+	metrics := collector.NewMetrics(*metricsName, *metricsAppName, *metricsGuageName)
 	registry := prometheus.NewRegistry()
 	registry.MustRegister(metrics)
 
-	http.Handle(*metricsPath, promhttp.HandlerFor(registry, promhttp.HandlerOpts{}))
+	http.Handle(metricPath, promhttp.HandlerFor(registry, promhttp.HandlerOpts{}))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`<html>
 			<head><title>A Prometheus Exporter</title></head>
@@ -35,7 +39,7 @@ func main() {
 			</html>`))
 	})
 
-	log.Printf("Starting Server at http://localhost:%s%s", *listenAddr, *metricsPath)
+	log.Printf("Starting Server at http://localhost:%s%s", *listenAddr, metricPath)
 	log.Fatal(http.ListenAndServe(":"+*listenAddr, nil))
 }
 

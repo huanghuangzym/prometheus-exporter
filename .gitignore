@@ -2,6 +2,9 @@
 *.lock
 *.log
 
+prometheus-exporter
+
+
 /.project
 /.pydevproject
 /.settings/org.eclipse.core.resources.prefs

@@ -90,18 +90,3 @@ func main() {
 
 这段代码仅仅通过http模块指定了一个路径`/metrics`，并将client_golang库中的`promhttp.Handler()`作为处理函数传递进去后，就可以获取指标数据了。这个最简单的 Exporter 内部其实是使用了一个默认的收集器`NewGoCollector`采集当前Go运行时的相关信息，比如go堆栈使用、goroutine数据等等。
 
-## 三、Demo Exporter的目录结构
-项目的目录结构如下：
-```
-prometheus-exporter/
-|-- collector
-`-- vendor
-    `-- github.com
-        |-- beorn7
-        |-- golang
-        |-- matttproud
-        `-- prometheus
-```
-
-* `vendor`是项目依赖的外部包
-* `collector`实现一个采集器，用于采集指标数据

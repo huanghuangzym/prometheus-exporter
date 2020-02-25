@@ -11,21 +11,16 @@ import (
 )
 
 var (
-	// Set during go build
-	// version   string
-	// gitCommit string
-
-	// 命令行参数
 	listenAddr  = flag.String("web.listen-port", "9001", "An port to listen on for web interface and telemetry.")
 	metricsPath = flag.String("web.telemetry-path", "/metrics", "A path under which to expose metrics.")
-	metricsNamespace = flag.String("metric.namespace", "demo", "Prometheus metrics namespace, as the prefix of metrics name")
+	metricsName = flag.String("metric.name", "product_demo", "Prometheus metrics name")
 )
 
 
 func main() {
 	flag.Parse()
 
-	metrics := collector.NewMetrics(*metricsNamespace)
+	metrics := collector.NewMetrics(*metricsName)
 	registry := prometheus.NewRegistry()
 	registry.MustRegister(metrics)
 
